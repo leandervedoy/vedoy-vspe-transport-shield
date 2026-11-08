@@ -1,8 +1,8 @@
 //! Experimental per-word AEAD, authenticated outer envelope, and padding.
 //! No claim of cryptographic advantage over standard E2EE. The public_seed is
 //! NON-secret and does not add entropy to the session/ratchet secret.
-use aes_gcm_siv::{aead::Payload as AesPayload, Aes256GcmSiv};
-use chacha20poly1305::{aead::Payload as ChaPayload, ChaCha20Poly1305};
+use aes_gcm_siv::{aead::{Aead as _, Payload as AesPayload}, Aes256GcmSiv};
+use chacha20poly1305::{aead::{Aead as _, Payload as ChaPayload}, ChaCha20Poly1305};
 use hkdf::Hkdf;
 use hmac::{Hmac, Mac};
 use rand_core::{OsRng, RngCore};
@@ -90,10 +90,12 @@ fn algorithm(seed: &[u8; 32], id: &[u8; 16], index: u32) -> u8 {
 fn encrypt_word(alg: u8, key: &[u8; 32], nonce: &[u8; 12],
                 msg: &[u8], aad: &[u8]) -> ShieldResult<Vec<u8>> {
     match alg {
-        0 => Aes256GcmSiv::new_from_slice(key).map_err(|_| ShieldError::InvalidFormat)?
+        0 => <Aes256GcmSiv as aes_gcm_siv::aead::KeyInit>::new_from_slice(key)
+            .map_err(|_| ShieldError::InvalidFormat)?
             .encrypt(nonce.into(), AesPayload { msg, aad })
             .map_err(|_| ShieldError::AuthenticationFailed),
-        1 => ChaCha20Poly1305::new_from_slice(key).map_err(|_| ShieldError::InvalidFormat)?
+        1 => <ChaCha20Poly1305 as chacha20poly1305::aead::KeyInit>::new_from_slice(key)
+            .map_err(|_| ShieldError::InvalidFormat)?
             .encrypt(nonce.into(), ChaPayload { msg, aad })
             .map_err(|_| ShieldError::AuthenticationFailed),
         _ => Err(ShieldError::InvalidFormat),
@@ -102,10 +104,12 @@ fn encrypt_word(alg: u8, key: &[u8; 32], nonce: &[u8; 12],
 fn decrypt_word(alg: u8, key: &[u8; 32], nonce: &[u8; 12],
                 msg: &[u8], aad: &[u8]) -> ShieldResult<Vec<u8>> {
     match alg {
-        0 => Aes256GcmSiv::new_from_slice(key).map_err(|_| ShieldError::InvalidFormat)?
+        0 => <Aes256GcmSiv as aes_gcm_siv::aead::KeyInit>::new_from_slice(key)
+            .map_err(|_| ShieldError::InvalidFormat)?
             .decrypt(nonce.into(), AesPayload { msg, aad })
             .map_err(|_| ShieldError::AuthenticationFailed),
-        1 => ChaCha20Poly1305::new_from_slice(key).map_err(|_| ShieldError::InvalidFormat)?
+        1 => <ChaCha20Poly1305 as chacha20poly1305::aead::KeyInit>::new_from_slice(key)
+            .map_err(|_| ShieldError::InvalidFormat)?
             .decrypt(nonce.into(), ChaPayload { msg, aad })
             .map_err(|_| ShieldError::AuthenticationFailed),
         _ => Err(ShieldError::InvalidFormat),
