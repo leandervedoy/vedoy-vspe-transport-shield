@@ -9,6 +9,7 @@ pub mod json;
 pub mod ratchet;
 pub mod session;
 pub mod storage;
+pub mod transport;
 pub mod vault;
 pub mod wordforge;
 use thiserror::Error;

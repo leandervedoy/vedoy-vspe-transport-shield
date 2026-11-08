@@ -12,6 +12,11 @@ The library provides a test-covered research implementation of:
 - a fail-closed optional bridge to Signal's SPQR ratchet; and
 - versioned JSON transport envelopes with bounded parsing.
 
+`transport::encode_packet` and `transport::decode_packet` define the public
+wire boundary. They reject malformed or oversized packets, but do not establish
+network trust; applications must use authenticated transport and pass decoded
+packets through the durable session API before exposing plaintext.
+
 The crate source lives in `rust/vedoy-shield-core/`; the repository-root
 `Cargo.toml` is the canonical build entrypoint.
 

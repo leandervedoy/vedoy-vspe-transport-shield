@@ -4,6 +4,7 @@ use vedoy_shield_core::{
     identity::{IdentityDocument, IdentityProofing, ProofingRequest, UnconfiguredProofing},
     json::{capabilities, encode_bounded, parse_bounded},
     storage::EncryptedAtomicStore,
+    transport::{decode_packet, encode_packet},
     vault::{SecureKeyVault, UnavailableVault},
     wordforge::{decrypt_message, encrypt_message, WordEnvelope},
 };
@@ -57,6 +58,22 @@ fn rejects_tampered_wordforge_envelope() {
     assert!(decrypt_message(&env, "chat-b", step.sequence, &step.key).is_err());
     env.ciphertext[0] ^= 1;
     assert!(decrypt_message(&env, "chat-a", step.sequence, &step.key).is_err());
+}
+#[test]
+fn transport_codec_rejects_tampering_and_wrong_version() {
+    let (bob, bundle) = RecipientPrivate::generate();
+    let sender = SenderIdentity::generate();
+    let (_, root) = initiate(&bundle, &bob.identity_public(), &sender, "chat-a").unwrap();
+    let chain = SessionChains::initiator(&root).unwrap();
+    let step = chain.send.prepare().unwrap();
+    let envelope = encrypt_message("Wire test", "chat-a", 0, &step.key).unwrap();
+    let packet = vedoy_shield_core::session::SentPacket { chat_id: "chat-a".into(), envelope };
+    let encoded = encode_packet(&packet).unwrap();
+    assert_eq!(decode_packet(&encoded).unwrap().chat_id, "chat-a");
+
+    let mut malformed = packet;
+    malformed.envelope.version = 99;
+    assert!(encode_packet(&malformed).is_err());
 }
 #[test]
 fn json_bounded_and_versioned() {

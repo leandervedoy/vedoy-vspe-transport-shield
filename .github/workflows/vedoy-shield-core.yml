@@ -35,5 +35,7 @@ jobs:
         run: cargo clippy --all-targets -- -D warnings
       - name: "Default (no SPQR: fail closed)"
         run: cargo test --all-targets
+      - name: Install protobuf compiler for SPQR
+        run: sudo apt-get update && sudo apt-get install --yes protobuf-compiler
       - name: Optional Signal SPQR (AGPLv3 only; test, not deployment)
         run: cargo test --all-targets --features signal-spqr
