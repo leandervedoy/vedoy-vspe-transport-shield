@@ -96,10 +96,10 @@ impl EncryptedAtomicStore {
     fn lock(&self, exclusive: bool) -> ShieldResult<File> {
         let path = self.folder.join(format!(".{}.lock", self.filename));
         #[cfg(unix)]
-        let file = OpenOptions::new().read(true).write(true).create(true).mode(0o600)
+        let file = OpenOptions::new().read(true).write(true).create(true).truncate(false).mode(0o600)
             .open(path).map_err(|_| ShieldError::Storage)?;
         #[cfg(not(unix))]
-        let file = OpenOptions::new().read(true).write(true).create(true)
+        let file = OpenOptions::new().read(true).write(true).create(true).truncate(false)
             .open(path).map_err(|_| ShieldError::Storage)?;
         let r = if exclusive { FileExt::lock_exclusive(&file) }
                 else { FileExt::lock_shared(&file) };
