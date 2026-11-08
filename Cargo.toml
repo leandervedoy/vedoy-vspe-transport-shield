@@ -1,0 +1,34 @@
+[package]
+name = "vedoy-vspe-transport-shield"
+version = "0.3.0"
+edition = "2021"
+rust-version = "1.88"
+description = "Vedoy VSPE experimental post-quantum transport research library; NOT for production use"
+publish = false
+[lib]
+name = "vedoy_shield_core"
+path = "rust/vedoy-shield-core/src/lib.rs"
+[features]
+default = []
+signal-spqr = ["dep:spqr", "dep:rand"]
+[dependencies]
+aes-gcm-siv = "=0.11.1"
+argon2 = "=0.5.3"
+chacha20poly1305 = "=0.10.1"
+ed25519-dalek = "=2.2.0"
+fs2 = "=0.4.3"
+hkdf = "=0.12.4"
+hmac = "=0.12.1"
+ml-kem = { version = "=0.3.4", features = ["getrandom", "zeroize"] }
+rand_core = { version = "=0.6.4", features = ["getrandom"] }
+serde = { version = "=1.0.228", features = ["derive"] }
+serde_json = "=1.0.145"
+sha2 = "=0.10.9"
+thiserror = "=2.0.17"
+unicode-segmentation = "=1.12.0"
+x25519-dalek = { version = "=2.0.1", features = ["static_secrets", "zeroize", "getrandom"] }
+zeroize = { version = "=1.8.1", features = ["zeroize_derive"] }
+spqr = { git = "https://github.com/signalapp/SparsePostQuantumRatchet.git", tag = "v1.6.0", optional = true }
+rand = { version = "=0.9.2", optional = true }
+[dev-dependencies]
+proptest = "=1.6.0"

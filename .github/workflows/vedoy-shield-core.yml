@@ -1,0 +1,39 @@
+name: Vedoy VSPE Transport Shield - Rust CI
+on:
+  push:
+    paths:
+      - "rust/vedoy-shield-core/**"
+      - "Cargo.toml"
+      - ".github/workflows/vedoy-shield-core.yml"
+  pull_request:
+    paths:
+      - "rust/vedoy-shield-core/**"
+      - "Cargo.toml"
+      - ".github/workflows/vedoy-shield-core.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  core:
+    name: Rust crypto research checks (NOT a security audit)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: .
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: .
+      - name: Format sources for test compilation
+        run: cargo fmt --all
+      - name: Static Rust checks
+        run: cargo clippy --all-targets -- -D warnings
+      - name: Default (no SPQR: fail closed)
+        run: cargo test --all-targets
+      - name: Optional Signal SPQR (AGPLv3 only; test, not deployment)
+        run: cargo test --all-targets --features signal-spqr
