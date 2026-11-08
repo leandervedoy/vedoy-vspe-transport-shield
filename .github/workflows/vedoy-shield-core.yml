@@ -33,7 +33,7 @@ jobs:
         run: cargo fmt --all
       - name: Static Rust checks
         run: cargo clippy --all-targets -- -D warnings
-      - name: Default (no SPQR: fail closed)
+      - name: "Default (no SPQR: fail closed)"
         run: cargo test --all-targets
       - name: Optional Signal SPQR (AGPLv3 only; test, not deployment)
         run: cargo test --all-targets --features signal-spqr
