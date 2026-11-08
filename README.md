@@ -49,3 +49,23 @@ Do not use production credentials, keys, messages, or identity documents in
 tests. See [the core documentation](rust/vedoy-shield-core/README.md), the
 [security policy](docs/SECURITY.md), and the
 [integration plan](docs/INTEGRATION.md) before integration.
+
+## Node.js package
+
+The repository also contains an ESM Node.js package that validates and encodes
+the public encrypted packet format. It intentionally does **not** implement
+cryptography, sessions or key management.
+
+```bash
+npm install @vedoy/vspe-transport-shield
+```
+
+Until the npm package is published under the `@vedoy` scope, install this
+repository directly:
+
+```bash
+npm install github:leandervedoy/vedoy-vspe-transport-shield
+```
+
+Run `npm test` for the Node transport tests and `npm run pack:check` to inspect
+the npm tarball before publishing.

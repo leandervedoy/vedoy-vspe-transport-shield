@@ -1,0 +1,32 @@
+{
+  "name": "@vedoy/vspe-transport-shield",
+  "version": "0.3.0",
+  "description": "Bounded public VSPE transport-packet validation for Node.js; not a cryptography implementation.",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./node/index.js"
+  },
+  "files": [
+    "node/index.js",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test node/test/*.test.js",
+    "pack:check": "npm pack --dry-run"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "vedoy",
+    "vspe",
+    "transport",
+    "packet-validation",
+    "security-research"
+  ]
+}
