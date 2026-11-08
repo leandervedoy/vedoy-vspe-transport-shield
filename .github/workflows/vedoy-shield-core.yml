@@ -4,11 +4,15 @@ on:
     paths:
       - "rust/vedoy-shield-core/**"
       - "Cargo.toml"
+      - "package.json"
+      - "node/**"
       - ".github/workflows/vedoy-shield-core.yml"
   pull_request:
     paths:
       - "rust/vedoy-shield-core/**"
       - "Cargo.toml"
+      - "package.json"
+      - "node/**"
       - ".github/workflows/vedoy-shield-core.yml"
   workflow_dispatch:
 permissions:
@@ -39,3 +43,16 @@ jobs:
         run: sudo apt-get update && sudo apt-get install --yes protobuf-compiler
       - name: Optional Signal SPQR (AGPLv3 only; test, not deployment)
         run: cargo test --all-targets --features signal-spqr
+  node:
+    name: Node transport package checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Run Node transport tests
+        run: npm test
+      - name: Inspect npm package contents
+        run: npm run pack:check
