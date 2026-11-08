@@ -1,8 +1,8 @@
 //! Experimental per-word AEAD, authenticated outer envelope, and padding.
 //! No claim of cryptographic advantage over standard E2EE. The public_seed is
 //! NON-secret and does not add entropy to the session/ratchet secret.
-use aes_gcm_siv::{aead::{Aead as _, KeyInit as _, Payload as AesPayload}, Aes256GcmSiv};
-use chacha20poly1305::{aead::{Aead as _, KeyInit as _, Payload as ChaPayload}, ChaCha20Poly1305};
+use aes_gcm_siv::{aead::Payload as AesPayload, Aes256GcmSiv};
+use chacha20poly1305::{aead::Payload as ChaPayload, ChaCha20Poly1305};
 use hkdf::Hkdf;
 use hmac::{Hmac, Mac};
 use rand_core::{OsRng, RngCore};
