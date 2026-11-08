@@ -8,7 +8,9 @@
     <style>
       :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, sans-serif; background: #07100e; color: #e8f3ee; }
       * { box-sizing: border-box; } body { margin: 0; min-height: 100vh; background: radial-gradient(circle at 20% 0%, #164438 0, transparent 36rem), #07100e; }
-      main { width: min(940px, calc(100% - 3rem)); margin: 0 auto; padding: 8rem 0 5rem; }
+      .skip { position: absolute; left: -999px; } .skip:focus { left: 1rem; top: 1rem; z-index: 2; padding: .6rem .8rem; background: #e8f3ee; color: #07100e; }
+      main { width: min(940px, calc(100% - 3rem)); margin: 0 auto; padding: 2rem 0 5rem; }
+      nav { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding-bottom: 5rem; font-size: .9rem; } nav ul { display: flex; flex-wrap: wrap; gap: 1rem; margin: 0; padding: 0; list-style: none; }
       .eyebrow { color: #79d7b6; font-size: .78rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
       h1 { max-width: 15ch; margin: .6rem 0 1rem; font-size: clamp(3rem, 9vw, 6.7rem); line-height: .93; letter-spacing: -.07em; }
       .lead { max-width: 44rem; color: #bbccc4; font-size: clamp(1.1rem, 2vw, 1.35rem); line-height: 1.6; }
@@ -16,19 +18,41 @@
       .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
       article { padding: 1.35rem; border: 1px solid #2a4439; border-radius: 14px; background: rgba(10, 26, 21, .72); }
       h2 { margin: 0 0 .7rem; font-size: 1.05rem; } p { color: #b7c8c0; line-height: 1.55; }
-      code { color: #a6ebcf; } a { color: #9ae6c8; } footer { margin-top: 4rem; color: #789188; font-size: .9rem; }
+      h3 { margin: 0 0 .4rem; font-size: 1rem; } code { color: #a6ebcf; } a { color: #9ae6c8; } section { margin-top: 4.5rem; } .section-lead { max-width: 43rem; margin-bottom: 1.4rem; }
+      .flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: .75rem; margin-top: 1rem; } .flow div { position: relative; padding: 1rem; border-radius: 10px; background: #10261f; color: #d5e9df; font-size: .9rem; } .flow div:not(:last-child)::after { content: "→"; position: absolute; right: -.6rem; color: #79d7b6; z-index: 1; }
+      .code { overflow-x: auto; padding: 1.1rem 1.25rem; border: 1px solid #2a4439; border-radius: 14px; background: #06110d; color: #bcefd9; line-height: 1.6; } .roadmap { display: grid; gap: .8rem; } .roadmap li { padding: 1rem 1.15rem; border-left: 2px solid #2a4439; color: #b7c8c0; } .roadmap strong { color: #e8f3ee; } footer { margin-top: 4rem; color: #789188; font-size: .9rem; }
+      @media (max-width: 650px) { nav { padding-bottom: 3rem; align-items: flex-start; flex-direction: column; } .flow { grid-template-columns: 1fr; } .flow div:not(:last-child)::after { content: "↓"; right: auto; bottom: -.8rem; left: 50%; } }
     </style>
   </head>
   <body>
+    <a class="skip" href="#content">Skip to content</a>
     <main>
-      <div class="eyebrow">Vedoy Studio · Research</div>
-      <h1>VSPE Transport Shield</h1>
-      <p class="lead">An experimental Rust transport-security core for future Vedoy applications.</p>
-      <aside class="notice"><strong>Research status.</strong> This project is not independently audited and is not production-ready. It is not a VPN, an end-to-end messaging service, or a complete PQXDH / Double or Triple Ratchet implementation.</aside>
+      <nav aria-label="Primary navigation"><span class="eyebrow">Vedoy Studio · Research</span><ul><li><a href="#architecture">Architecture</a></li><li><a href="#integration">Integration</a></li><li><a href="#roadmap">Roadmap</a></li></ul></nav>
+      <div id="content">
+        <div class="eyebrow">Experimental transport-security core</div>
+        <h1>VSPE Transport Shield</h1>
+        <p class="lead">An experimental Rust transport-security core for future Vedoy applications.</p>
+        <aside class="notice"><strong>Research status.</strong> This project is not independently audited and is not production-ready. It is not a VPN, an end-to-end messaging service, or a complete PQXDH / Double or Triple Ratchet implementation.</aside>
+      </div>
       <section class="grid" aria-label="Project capabilities">
         <article><h2>Hybrid startup</h2><p>Identity-pinned X25519 and ML-KEM-1024 research handshake with signed transcripts.</p></article>
         <article><h2>Durable state</h2><p>Encrypted local snapshots and persist-before-network outbox handling.</p></article>
         <article><h2>Transport boundary</h2><p><code>encode_packet</code> and <code>decode_packet</code> enforce bounded public wire data.</p></article>
+      </section>
+      <section id="architecture">
+        <div class="eyebrow">Packet lifecycle</div><h2>Persist before network</h2><p class="section-lead">A packet is returned to the application only after the next local state and encrypted outbox are committed. Network delivery, relay trust and acknowledgements remain outside the library.</p>
+        <div class="flow" aria-label="Packet lifecycle"><div>1. Pin peer identity</div><div>2. Create encrypted packet</div><div>3. Commit local outbox</div><div>4. Send through authenticated transport</div></div>
+      </section>
+      <section id="integration">
+        <div class="eyebrow">Public wire boundary</div><h2>Keep private state local</h2><p class="section-lead">Only a public encrypted <code>SentPacket</code> belongs on the wire. Passwords, PINs, private identities and snapshots never do.</p>
+        <pre class="code"><code>let bytes = transport::encode_packet(&amp;packet)?;
+// send bytes using your authenticated transport
+let packet = transport::decode_packet(&amp;received_bytes)?;
+let plaintext = session::receive_message(/* durable local store */, &amp;packet)?;</code></pre>
+      </section>
+      <section id="roadmap">
+        <div class="eyebrow">Before any product launch</div><h2>Release gates</h2>
+        <ul class="roadmap"><li><strong>Independent audit:</strong> protocol design, implementation and dependency review.</li><li><strong>Platform security:</strong> Android Keystore and iOS Keychain adapters with retry and recovery policy.</li><li><strong>Production protocol:</strong> reviewed PQXDH plus a complete ratchet implementation, key transparency and multi-device design.</li><li><strong>Service boundary:</strong> authenticated relay, delivery receipts, abuse controls, monitoring and incident response.</li></ul>
       </section>
       <footer>Source, test status, limitations and integration notes are maintained in the <a href="https://github.com/leandervedoy/vedoy-vspe-transport-shield">GitHub repository</a>.</footer>
     </main>
